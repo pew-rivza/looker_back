@@ -1,0 +1,27 @@
+{
+  "name": "looker_back",
+  "version": "1.0.0",
+  "description": "This is backend for the wardrobe management application Looker.",
+  "main": "index.js",
+  "scripts": {
+
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pew-rivza/looker_back.git"
+  },
+  "keywords": [
+    "wardrobe",
+    "lookbook",
+    "clothes"
+  ],
+  "author": {
+    "name": "pew-rivza",
+    "email": "pug.ekat@gmail.com"
+  },
+  "license": "AGPL-3.0-only",
+  "bugs": {
+    "url": "https://github.com/pew-rivza/looker_back/issues"
+  },
+  "homepage": "https://github.com/pew-rivza/looker_back#readme"
+}
