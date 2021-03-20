@@ -1,7 +1,7 @@
 const {Router} = require("express");
 const bcrypt = require("bcryptjs");
 const {check, validationResult} = require("express-validator");
-const User = require("./../models/User");
+const User = require("../models/User");
 const router = Router();
 const jwt = require("jsonwebtoken");
 
@@ -31,17 +31,18 @@ router.post(
 
             const candidate = await User.findOne({ where: { email } });
 
-            if(candidate) {
-                return res.status(400).json({ message: "Такой пользователь уже существует" })
+            if (candidate) {
+                return res.status(400).json({ message: "Такой пользователь уже существует" });
             }
 
             const hashedPassword = await bcrypt.hash(password, 12);
+
             await User.create({ email, password: hashedPassword });
 
-            res.status(201).json({ message: "Пользователь создан" });
+            res.status(201).json({ message: "Пользователь создан", body: req.body, candidate });
         }
         catch (e) {
-            res.status(500).json({ message: "Что-то пошло не так, попробуйте снова" })
+            res.status(500).json({ message: "Что-то пошло не так, попробуйте снова", error: e, res })
         }
     });
 
@@ -75,7 +76,7 @@ router.post(
             const token = jwt.sign(
                 { userId: user.id },
                 JWT_SECRET,
-                { expiresIn: "1h" }
+                { expiresIn: "2h" }
             )
 
             res.json({ token, user: user.id })

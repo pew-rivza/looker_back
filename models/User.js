@@ -1,9 +1,14 @@
-const { Sequelize, DataTypes } = require('sequelize');
-const sequelize = new Sequelize('sqlite::memory:');
+const DBConn = require("../classes/DatabaseConnection");
+const database = DBConn.getInstance().getDatabase();
+const types = DBConn.types;
 
-const User = sequelize.define('User', {
-    email: { type: DataTypes.STRING, allowNull: false, unique: true },
-    password: { type: DataTypes.STRING, allowNull: false }
+const User = database.define("User", {
+    email: { type: types.STRING, allowNull: false, unique: true },
+    password: { type: types.STRING, allowNull: false }
+});
+
+database.sync().then(() => {
+    console.log("Users synchronized");
 });
 
 module.exports = User;
