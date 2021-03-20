@@ -32,7 +32,8 @@
     "jsonwebtoken": "^8.5.1",
     "mysql2": "^2.2.5",
     "sequelize": "^6.5.0",
-    "sqlite3": "^5.0.2"
+    "sqlite3": "^5.0.2",
+    "ws": "^7.4.4"
   },
   "devDependencies": {
     "concurrently": "^6.0.0",
