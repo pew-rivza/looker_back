@@ -1,15 +1,11 @@
 const {Router} = require("express");
 const bcrypt = require("bcryptjs");
 const {check, validationResult} = require("express-validator");
-const User = require("../models/User");
 const router = Router();
 const jwt = require("jsonwebtoken");
+const db = require("./../models");
 
 const JWT_SECRET = "RIVZA";
-
-router.get("/check", async (req, res) => {
-    res.status(200).json({ message: "Hello! This is my test backend" });
-})
 
 router.post(
     "/register",
@@ -29,7 +25,7 @@ router.post(
 
             const { email, password } = req.body;
 
-            const candidate = await User.findOne({ where: { email } });
+            const candidate = await db.User.findOne({ where: { email } });
 
             if (candidate) {
                 return res.status(400).json({ message: "Такой пользователь уже существует" });
@@ -37,7 +33,7 @@ router.post(
 
             const hashedPassword = await bcrypt.hash(password, 12);
 
-            await User.create({ email, password: hashedPassword });
+            await db.User.create({ email, password: hashedPassword });
 
             res.status(201).json({ message: "Пользователь создан", body: req.body, candidate });
         }
@@ -63,7 +59,7 @@ router.post(
 
             const { email, password } = req.body;
 
-            const user = await User.findOne({ where: { email } });
+            const user = await db.User.findOne({ where: { email } });
             if (!user) {
                 return res.status(400).json({ message: "Пользователь с таким e-mail не найден" });
             }
@@ -76,7 +72,7 @@ router.post(
             const token = jwt.sign(
                 { userId: user.id },
                 JWT_SECRET,
-                { expiresIn: "2h" }
+                { expiresIn: "1h" }
             )
 
             res.json({ token, user: user.id })
