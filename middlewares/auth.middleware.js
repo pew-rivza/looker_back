@@ -13,8 +13,7 @@ module.exports = async (req, res, next) => {
             return res.status(401).json({message: "Пользователь не авторизован1"});
         }
 
-        const decoded = jwt.verify(token, JWT_SECRET);
-        req.user = decoded;
+        req.user = jwt.verify(token, JWT_SECRET);
         next();
     } catch (e) {
         res.status(401).json({message: "Пользователь не авторизован2", req});
