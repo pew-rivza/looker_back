@@ -1,7 +1,10 @@
 const { Sequelize } = require('sequelize');
+const config = require("config");
 
-const sequelize = new Sequelize('rivzakat_looker', 'rivzakat_looker', 'XmI0B&0A', {
-    host: 'rivzakat.beget.tech',
+const dbConfig = config.get("db");
+
+const sequelize = new Sequelize(dbConfig.dbName, dbConfig.user, dbConfig.password, {
+    host: dbConfig.host,
     dialect: 'mysql'
 });
 

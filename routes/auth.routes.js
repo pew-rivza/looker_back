@@ -4,8 +4,7 @@ const {check, validationResult} = require("express-validator");
 const router = Router();
 const jwt = require("jsonwebtoken");
 const db = require("./../models");
-
-const JWT_SECRET = "RIVZA";
+const config = require("config");
 
 router.post(
     "/register",
@@ -71,8 +70,8 @@ router.post(
 
             const token = jwt.sign(
                 { userId: user.id },
-                JWT_SECRET,
-                { expiresIn: "1h" }
+                config.get("jwt_secret"),
+                { expiresIn: "8h" }
             )
 
             res.json({ token, user: user.id })

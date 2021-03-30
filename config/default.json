@@ -1,0 +1,10 @@
+{
+  "port": 5000,
+  "jwt_secret": "CQtf83WwAQ2V",
+  "db": {
+    "dbName": "rivzakat_looker",
+    "user": "rivzakat_looker",
+    "password": "XmI0B&0A",
+    "host": "rivzakat.beget.tech"
+  }
+}
