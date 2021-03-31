@@ -1,5 +1,5 @@
 {
-  "port": 80,
+  "port": 3000,
   "jwt_secret": "CQtf83WwAQ2V",
   "db": {
     "dbName": "rivzakat_looker",
