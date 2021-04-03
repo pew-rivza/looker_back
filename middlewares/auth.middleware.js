@@ -13,8 +13,12 @@ module.exports = async (req, res, next) => {
             return res.status(401).json({message: "Пользователь не авторизован1"});
         }
 
-        req.user = jwt.verify(token, config.get("jwt_secret"));
-        next();
+        jwt.verify(token, config.get("jwt_secret"), function (err, user) {
+            if (err) return res.status(401).json({ message: "Пользователь не авторизован3" });
+
+            req.user = user;
+            next();
+        });
     } catch (e) {
         res.status(401).json({message: "Пользователь не авторизован2", req});
     }
