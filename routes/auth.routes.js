@@ -5,6 +5,7 @@ const router = Router();
 const jwt = require("jsonwebtoken");
 const db = require("./../models");
 const config = require("config");
+const validation = require("../middlewares/validation.middleware");
 
 router.post(
     "/register",
@@ -44,18 +45,12 @@ router.post(
 router.post(
     "/login",
     [
-        check("email", "Введите корректный e-mail").normalizeEmail().isEmail(),
-        check("password", "Введие пароль").exists()
+        check("email", "Некорректный e-mail").normalizeEmail().isEmail(),
+        check("password", "Пароль является обязательным полем").exists(),
+        validation
     ],
     async (req, res) => {
         try {
-            const errors = validationResult(req);
-
-            if(!errors.isEmpty()) {
-                return res.status(400)
-                    .json({ errors: errors.array(), message: "Некорректные данные при входе в систему" })
-            }
-
             const { email, password } = req.body;
 
             const user = await db.User.findOne({ where: { email } });
