@@ -2,9 +2,8 @@ const {Router} = require("express");
 const bcrypt = require("bcryptjs");
 const {check, validationResult} = require("express-validator");
 const router = Router();
-const jwt = require("jsonwebtoken");
 const db = require("./../models");
-const config = require("config");
+const User = db.User;
 const validation = require("../middlewares/validation.middleware");
 
 router.post(
@@ -45,35 +44,20 @@ router.post(
 router.post(
     "/login",
     [
+        check("email", "E-mail является обязательным полем").notEmpty(),
         check("email", "Некорректный e-mail").normalizeEmail().isEmail(),
-        check("password", "Пароль является обязательным полем").exists(),
+        check("password", "Пароль является обязательным полем").notEmpty(),
         validation
     ],
     async (req, res) => {
         try {
             const { email, password } = req.body;
-
-            const user = await db.User.findOne({ where: { email } });
-            if (!user) {
-                return res.status(400).json({ message: "Пользователь с таким e-mail не найден" });
-            }
-
-            const isMatch = await bcrypt.compare(password, user.password);
-            if (!isMatch) {
-                return res.status(400).json({ message: "Неверный пароль, попробуйте снова" });
-            }
-
-            const token = jwt.sign(
-                { userId: user.id },
-                config.get("jwt_secret"),
-                { expiresIn: "8h" }
-            )
-
-            res.json({ token, user: user.id })
-
+            let user = await User.authenticate(email, password);
+            user = await user.authorize()
+            res.json(user)
         }
         catch (e) {
-            res.status(500).json({ message: "Что-то пошло не так, попробуйте снова" })
+            res.status(500).json({ error: e.message, message: "Что-то пошло не так, попробуйте снова" })
         }
     });
 
