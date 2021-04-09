@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
     };
 
     User.authenticate = async function (email, password) {
-        const user = await User.findOne({ where: { email, active: +true } });
+        const user = await User.findOne({ where: { email, active: true } });
         if (!user) {
             throw new ValidationError("Неверный логин или пароль");
         }
@@ -39,6 +39,20 @@ module.exports = (sequelize, DataTypes) => {
 
         return {user: user.id, token}
     };
+
+    User.existenceChecking = async function(email) {
+        const candidate = await User.findOne({ where: { email } });
+
+        if (candidate) {
+            throw new ValidationError("Пользователь с таким e-mail уже зарегистрирован");
+        }
+    };
+
+    User.register = async function(email, password) {
+        const hashedPassword = await bcrypt.hash(password, 12);
+
+        return await User.create({ email, password: hashedPassword });
+    }
 
     return User;
 };

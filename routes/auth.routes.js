@@ -28,18 +28,10 @@ router.post(
     async (req, res) => {
         try {
             const { email, password } = req.body;
+            await User.existenceChecking(email);
+            await User.register(email, password);
 
-            const candidate = await db.User.findOne({ where: { email } });
-
-            if (candidate) {
-                return res.status(400).json({ message: "Такой пользователь уже существует" });
-            }
-
-            const hashedPassword = await bcrypt.hash(password, 12);
-
-            await db.User.create({ email, password: hashedPassword });
-
-            res.status(201).json({ message: "Пользователь создан", body: req.body, candidate });
+            res.status(201).json({ message: "Пользователь создан" });
         }
         catch (e) {
             res.status(500).json({ message: "Что-то пошло не так, попробуйте снова", error: e, res })
