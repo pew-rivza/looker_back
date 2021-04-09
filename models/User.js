@@ -1,31 +1,32 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const config = require("config");
+const ValidationError = require("./../errors/ValidationError");
 
 module.exports = (sequelize, DataTypes) => {
     const User = sequelize.define("User", {
         email: { type: DataTypes.STRING, allowNull: false, unique: true },
-        password: { type: DataTypes.STRING, allowNull: false }
+        password: { type: DataTypes.STRING, allowNull: false },
+        active: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false }
     });
 
     User.associate = function ({ Clothes }) {
         User.hasMany(Clothes)
     };
 
-
     User.authenticate = async function (email, password) {
-        const user = await User.findOne({ where: { email } });
+        const user = await User.findOne({ where: { email, active: +true } });
         if (!user) {
-            throw new Error("Пользователя с таким e-mail не существует");
+            throw new ValidationError("Неверный логин или пароль");
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            throw new Error("Неверный пароль")
+            throw new ValidationError("Неверный логин или пароль");
         }
 
         return user
-    }
+    };
 
     User.prototype.authorize = async function() {
         const user = this;
@@ -37,7 +38,7 @@ module.exports = (sequelize, DataTypes) => {
         )
 
         return {user: user.id, token}
-    }
+    };
 
     return User;
 };

@@ -5,23 +5,28 @@ const router = Router();
 const db = require("./../models");
 const User = db.User;
 const validation = require("../middlewares/validation.middleware");
+const ValidationError = require("./../errors/ValidationError");
 
 router.post(
     "/register",
     [
-        check("email", "Некорректный e-mail").isEmail(),
-        check("password", "Минимальная длина пароля 6 символов")
-            .isLength({ min: 6 })
+        check("email", "E-mail является обязательным полем").notEmpty(),
+        check("email", "Некорректный e-mail").normalizeEmail().isEmail(),
+        check("password", "Пароль является обязательным полем").notEmpty(),
+        check("password", "Пароль должен содержать минимум 6 символов, один заглавный " +
+            "символ, один строчный символ, одну цифру и один специальный символ (@, $, !, %, *, #, ?, &)")
+            .custom(password => {
+                return (/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/).test(password)
+            }),
+        check("passwordConfirmation", "Подтверждение пароля является обязательным полем").notEmpty(),
+        check("passwordConfirmation", "Пароли должны совпадать")
+            .custom((passwordConfirmation, {req}) => {
+                return passwordConfirmation === req.body.password
+            }),
+        validation
     ],
     async (req, res) => {
         try {
-            const errors = validationResult(req);
-
-            if(!errors.isEmpty()) {
-                return res.status(400)
-                    .json({ errors: errors.array(), message: "Некорректные данные при регистрации" })
-            }
-
             const { email, password } = req.body;
 
             const candidate = await db.User.findOne({ where: { email } });
@@ -42,6 +47,24 @@ router.post(
     });
 
 router.post(
+    "/confirm",
+    [
+        check("code", ""),
+        validation
+    ],
+    async (req, res) => {
+        try {
+
+        } catch (error) {
+            if (error instanceof ValidationError) {
+                res.status(400).json({ message: error.message })
+            }
+
+            res.status(500).json({ message: "Что-то пошло не так, попробуйте снова" })
+        }
+    })
+
+router.post(
     "/login",
     [
         check("email", "E-mail является обязательным полем").notEmpty(),
@@ -56,8 +79,12 @@ router.post(
             user = await user.authorize()
             res.json(user)
         }
-        catch (e) {
-            res.status(500).json({ error: e.message, message: "Что-то пошло не так, попробуйте снова" })
+        catch (error) {
+            if (error instanceof ValidationError) {
+                res.status(400).json({ message: error.message })
+            }
+
+            res.status(500).json({ message: "Что-то пошло не так, попробуйте снова" })
         }
     });
 

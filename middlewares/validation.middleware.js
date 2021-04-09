@@ -9,7 +9,7 @@ module.exports = async (req, res, next) => {
         }
 
         next();
-    } catch (e) {
-        res.status(500).json({error: e, message: "При валидации формы что-то пошло не так"});
+    } catch (error) {
+        res.status(500).json({error: error, message: "При валидации формы что-то пошло не так"});
     }
 }
