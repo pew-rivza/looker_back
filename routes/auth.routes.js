@@ -28,8 +28,8 @@ router.post(
     async (req, res) => {
         try {
             const { email, password } = req.body;
-            await User.existenceChecking(email);
-            await User.register(email, password);
+            const user = await User.register(email, password);
+            user.sendCode();
 
             res.status(201).json({ message: "Пользователь создан" });
         }
