@@ -40,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
             { expiresIn: "8h" }
         )
 
-        return {user: user.id, token}
+        return { user: user.id, token }
     };
 
     User.existenceChecking = async function(email) {

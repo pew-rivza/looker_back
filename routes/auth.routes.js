@@ -1,6 +1,5 @@
 const {Router} = require("express");
-const bcrypt = require("bcryptjs");
-const {check, validationResult} = require("express-validator");
+const {check} = require("express-validator");
 const router = Router();
 const db = require("./../models");
 const User = db.User;
@@ -11,7 +10,7 @@ router.post(
     "/register",
     [
         check("email", "E-mail является обязательным полем").notEmpty(),
-        check("email", "Некорректный e-mail").normalizeEmail().isEmail(),
+        check("email", "Некорректный e-mail").isEmail(),
         check("password", "Пароль является обязательным полем").notEmpty(),
         check("password", "Пароль должен содержать минимум 6 символов, один заглавный " +
             "символ, один строчный символ, одну цифру и один специальный символ (@, $, !, %, *, #, ?, &)")
@@ -52,7 +51,7 @@ router.post(
     "/login",
     [
         check("email", "E-mail является обязательным полем").notEmpty(),
-        check("email", "Некорректный e-mail").normalizeEmail().isEmail(),
+        check("email", "Некорректный e-mail").isEmail(),
         check("password", "Пароль является обязательным полем").notEmpty(),
         validation
     ],
