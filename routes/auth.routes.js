@@ -5,7 +5,7 @@ const router = Router();
 const db = require("./../models");
 const User = db.User;
 const validation = require("../middlewares/validation.middleware");
-const ValidationError = require("./../errors/ValidationError");
+const errorHandler = require("./../errors");
 
 router.post(
     "/register",
@@ -33,9 +33,7 @@ router.post(
 
             res.status(201).json({ message: "Пользователь создан" });
         }
-        catch (e) {
-            res.status(500).json({ message: "Что-то пошло не так, попробуйте снова", error: e, res })
-        }
+        catch (error) { errorHandler(error, res); }
     });
 
 router.post(
@@ -47,13 +45,7 @@ router.post(
     async (req, res) => {
         try {
 
-        } catch (error) {
-            if (error instanceof ValidationError) {
-                res.status(400).json({ message: error.message })
-            }
-
-            res.status(500).json({ message: "Что-то пошло не так, попробуйте снова" })
-        }
+        } catch (error) { errorHandler(error, res); }
     })
 
 router.post(
@@ -69,15 +61,9 @@ router.post(
             const { email, password } = req.body;
             let user = await User.authenticate(email, password);
             user = await user.authorize()
-            res.json(user)
+            res.status(200).json(user)
         }
-        catch (error) {
-            if (error instanceof ValidationError) {
-                res.status(400).json({ message: error.message })
-            }
-
-            res.status(500).json({ message: "Что-то пошло не так, попробуйте снова" })
-        }
+        catch (error) { errorHandler(error, res); }
     });
 
 module.exports = router;
