@@ -38,11 +38,16 @@ router.post(
 router.post(
     "/confirm",
     [
-        check("code", ""),
+        check("code", "Код подтверждения является обязательным полем"),
         validation
     ],
     async (req, res) => {
         try {
+            const { code, email } = req.body;
+            let user = await User.confirm(email, code);
+            user = await user.authorize();
+
+            res.status(202).json(user);
 
         } catch (error) { errorHandler(error, res); }
     })

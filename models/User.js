@@ -4,6 +4,7 @@ const config = require("config");
 const ValidationError = require("./../errors/ValidationError");
 const shortid = require('shortid');
 const nodemailer = require("nodemailer");
+const ConfirmationCodeModel = require("./ConfirmationCode");
 
 module.exports = (sequelize, DataTypes) => {
     const User = sequelize.define("User", {
@@ -89,6 +90,27 @@ module.exports = (sequelize, DataTypes) => {
             console.log("Message sent:", info);
         })
     };
+
+    User.confirm = async function(email, userCode) {
+        let user = await User.findOne({ where: { email }, include: "ConfirmationCode" });
+
+        if (!user) {
+            throw new ValidationError("Пользователь с таким e-mail не найден");
+        }
+
+        const code = user.ConfirmationCode.code;
+
+        if (code !== userCode) {
+            throw new ValidationError("Неверный код подтверждения");
+        }
+
+        await User.update({ active: true }, { where: { email } });
+
+        const ConfirmationCode = ConfirmationCodeModel(sequelize, DataTypes);
+        ConfirmationCode.destroy({ where: { id: user.ConfirmationCode.id } });
+
+        return user;
+    }
 
     return User;
 };
