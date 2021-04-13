@@ -64,7 +64,7 @@ router.post(
         try {
             const { email, password } = req.body;
             let user = await User.authenticate(email, password);
-            user = await user.authorize()
+            user = await user.authorize();
             res.status(200).json(user)
         }
         catch (error) { errorHandler(error, res); }

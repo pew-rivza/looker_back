@@ -84,6 +84,7 @@ module.exports = (sequelize, DataTypes) => {
 
         }, (err, info) => {
             if (err) {
+                console.log(err);
                 throw new Error("Не удалось отправить код подтверждения")
             }
 
