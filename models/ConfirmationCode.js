@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     ConfirmationCode.associate = function ({ User }) {
-        ConfirmationCode.belongsTo(User);
+        ConfirmationCode.hasOne(User);
     };
 
     return ConfirmationCode;

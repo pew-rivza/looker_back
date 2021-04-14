@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
 
     User.associate = function ({ Clothes, ConfirmationCode }) {
         User.hasMany(Clothes);
-        User.hasOne(ConfirmationCode)
+        User.belongsTo(ConfirmationCode)
     };
 
     User.authenticate = async function (email, password) {
