@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const config = require("config");
 const ValidationError = require("./../errors/ValidationError");
+const DatabaseError = require("./../errors/DatabaseError");
 const shortid = require('shortid');
 const nodemailer = require("nodemailer");
 const ConfirmationCodeModel = require("./ConfirmationCode");
@@ -12,6 +13,8 @@ module.exports = (sequelize, DataTypes) => {
         password: { type: DataTypes.STRING, allowNull: false },
         active: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false }
     });
+
+    const ConfirmationCode = ConfirmationCodeModel(sequelize, DataTypes);
 
     User.associate = function ({ Clothes, ConfirmationCode }) {
         User.hasMany(Clothes);
@@ -85,25 +88,26 @@ module.exports = (sequelize, DataTypes) => {
         });
     };
 
-
-
-    User.confirm = async function(email, userCode) {
+    User.authenticateByConfirmationCode = async function (email, userCode) {
         let user = await User.findOne({ where: { email }, include: "ConfirmationCode" });
-
-        if (!user) {
-            throw new ValidationError("Пользователь с таким e-mail не найден");
+        if (!(user && user.ConfirmationCode)) {
+            throw new DatabaseError("Данные о пользователе с таким e-mail не найдены");
         }
 
         const code = user.ConfirmationCode.code;
-
-        if (code !== userCode) {
+        if (userCode !== code) {
             throw new ValidationError("Неверный код подтверждения");
         }
 
-        await User.update({ active: true }, { where: { email } });
+        return user;
+    };
 
-        const ConfirmationCode = ConfirmationCodeModel(sequelize, DataTypes);
-        ConfirmationCode.destroy({ where: { id: user.ConfirmationCode.id } });
+    User.confirm = async function(email, userCode) {
+        const user = await User.authenticateByConfirmationCode(email, userCode);
+        const code = user.ConfirmationCode;
+
+        await User.update({ active: true }, { where: { email } });
+        ConfirmationCode.destroy({ where: { id: code.id } });
 
         return user;
     }
