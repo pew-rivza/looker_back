@@ -64,9 +64,14 @@ module.exports = (sequelize, DataTypes) => {
 
     User.prototype.sendCode = async function() {
         const user = this;
-        const code = shortid.generate();
 
-        await user.createConfirmationCode({ code });
+        const existedCode = await user.getConfirmationCode();
+        const code = existedCode ? existedCode.code : shortid.generate();
+
+        if (!existedCode) {
+            await user.createConfirmationCode({ code });
+        }
+
         user.sendMail("Подтверждение e-mail для LKR-APP.COM", `Ваш код подтверждения: ${code}`);
     };
 
