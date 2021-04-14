@@ -6,5 +6,19 @@
     "user": "rivzakat_looker",
     "password": "XmI0B&0A",
     "host": "rivzakat.beget.tech"
+  },
+  "smtp": {
+    "transporter": {
+      "host": "smtp.yandex.ru",
+      "port": 465,
+      "secure": true,
+      "auth": {
+        "user": "dz-10b@ya.ru",
+        "pass": "dcodflnvahhwdjsp"
+      }
+    },
+    "defaults": {
+      "from": "Looker <dz-10b@ya.ru>"
+    }
   }
 }

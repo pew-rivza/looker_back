@@ -64,33 +64,28 @@ module.exports = (sequelize, DataTypes) => {
         const code = shortid.generate();
 
         await user.createConfirmationCode({ code });
+        user.sendMail("Подтверждение e-mail для LKR-APP.COM", `Ваш код подтверждения: ${code}`);
+    };
 
-        const transporter = nodemailer.createTransport({
-            host: 'smtp.yandex.ru',
-            port: 465,
-            secure: true,
-            auth: {
-                user: 'dz-10b@ya.ru',
-                pass: 'dcodflnvahhwdjsp'
-            }
-        }, {
-            from: "Looker <dz-10b@ya.ru>"
-        });
+    User.prototype.sendMail = function (subject, text) {
+        const user = this;
+        const smtp = config.get("smtp");
+        const transporter = nodemailer
+            .createTransport(smtp.transporter, smtp.defaults);
 
         transporter.sendMail({
             to: user.email,
-            subject: "Подтверждение e-mail для lkr-app.com",
-            text: code
-
-        }, (err, info) => {
+            subject,
+            text
+        }, (err) => {
             if (err) {
                 console.log(err);
-                throw new Error("Не удалось отправить код подтверждения")
+                throw new Error("Не удалось отправить письмо")
             }
-
-            console.log("Message sent:", info);
-        })
+        });
     };
+
+
 
     User.confirm = async function(email, userCode) {
         let user = await User.findOne({ where: { email }, include: "ConfirmationCode" });
