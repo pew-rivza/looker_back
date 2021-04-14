@@ -28,7 +28,7 @@ router.post(
         try {
             const { email, password } = req.body;
             const user = await User.register(email, password);
-            user.sendCode();
+            await user.sendCode();
 
             res.status(201).json({ message: "Пользователь создан" });
         }
