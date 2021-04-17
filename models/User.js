@@ -21,6 +21,15 @@ module.exports = (sequelize, DataTypes) => {
         User.belongsTo(ConfirmationCode)
     };
 
+    User.findActiveUser = async function(email) {
+        const user = await User.findOne({ where: { email, active: true } });
+        if (!user) {
+            throw new ValidationError("Пользователь с таким e-mail не найден");
+        }
+
+        return user;
+    }
+
     User.authenticate = async function (email, password) {
         const user = await User.findOne({ where: { email, active: true } });
         if (!user) {
@@ -115,7 +124,14 @@ module.exports = (sequelize, DataTypes) => {
         ConfirmationCode.destroy({ where: { id: code.id } });
 
         return user;
-    }
+    };
+
+    User.prototype.setPassword = async function(password) {
+        const user = this;
+        const hashedPassword = await bcrypt.hash(password, 12);
+
+        await User.update({ password: hashedPassword }, { where: { id: user.id } });
+    };
 
     return User;
 };

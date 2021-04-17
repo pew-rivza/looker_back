@@ -36,8 +36,10 @@ router.post(
     });
 
 router.post(
-    "/confirm",
+    "/register/confirm",
     [
+        check("email", "E-mail является обязательным полем").notEmpty(),
+        check("email", "Некорректный e-mail").isEmail(),
         check("code", "Код подтверждения является обязательным полем"),
         validation
     ],
@@ -50,7 +52,90 @@ router.post(
             res.status(202).json(user);
 
         } catch (error) { errorHandler(error, res); }
-    })
+    });
+
+router.post(
+    "/resend",
+    [
+        check("email", "E-mail является обязательным полем").notEmpty(),
+        check("email", "Некорректный e-mail").isEmail(),
+        validation
+    ],
+    async (req, res) => {
+        try {
+            const { email } = req.body;
+            let user = await User.findActiveUser(email);
+            await user.sendCode();
+
+            res.status(200).json({ message: "Код подтверждения выслан повторно" });
+
+        } catch (error) { errorHandler(error, res); }
+    });
+
+router.post(
+    "/forget",
+    [
+        check("email", "E-mail является обязательным полем").notEmpty(),
+        check("email", "Некорректный e-mail").isEmail(),
+        validation
+    ],
+    async (req, res) => {
+        try {
+            const { email } = req.body;
+            let user = await User.findActiveUser(email);
+            await user.sendCode();
+
+            res.status(200).json({ message: "Код подтверждения выслан" });
+        }
+        catch (error) { errorHandler(error, res); }
+    });
+
+router.post(
+    "/forget/confirm",
+    [
+        check("email", "E-mail является обязательным полем").notEmpty(),
+        check("email", "Некорректный e-mail").isEmail(),
+        check("code", "Код подтверждения является обязательным полем"),
+        validation
+    ],
+    async (req, res) => {
+        try {
+            const { code, email } = req.body;
+            await User.confirm(email, code);
+
+            res.status(202).json({ message: "E-mail подтвержден" });
+        }
+        catch (error) { errorHandler(error, res); }
+    });
+
+router.post(
+    "/password",
+    [
+        check("email", "E-mail является обязательным полем").notEmpty(),
+        check("email", "Некорректный e-mail").isEmail(),
+        check("password", "Пароль является обязательным полем").notEmpty(),
+        check("password", "Пароль должен содержать минимум 6 символов, один заглавный " +
+            "символ, один строчный символ, одну цифру и один специальный символ (@, $, !, %, *, #, ?, &)")
+            .custom(password => {
+                return (/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/).test(password)
+            }),
+        check("passwordConfirmation", "Подтверждение пароля является обязательным полем").notEmpty(),
+        check("passwordConfirmation", "Пароли должны совпадать")
+            .custom((passwordConfirmation, {req}) => {
+                return passwordConfirmation === req.body.password
+            }),
+        validation
+    ],
+    async (req, res) => {
+        try {
+            const { email, password } = req.body;
+            let user = await User.findActiveUser(email);
+            user.setPassword(password);
+
+            res.status(200).json({ message: "Пароль успешно изменен" });
+        }
+        catch (error) { errorHandler(error, res); }
+    });
 
 router.post(
     "/login",
