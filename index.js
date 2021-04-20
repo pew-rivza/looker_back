@@ -28,8 +28,8 @@ async function start() {
         await db.sequelize.authenticate();
         await db.sequelize.sync();
 
-        console.log("Database has been connected...");
-        app.listen(PORT, "localhost", () => console.log(`Server on ${PORT} port has been started...`));
+        console.log("Database has been connected..1.");
+        app.listen(PORT, "localhost", () => console.log(`Server on ${PORT} port has been started...1`));
 
     } catch (error) {
         console.log("Unable to connect to the DB: ", error)
