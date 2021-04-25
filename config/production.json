@@ -1,24 +1,24 @@
 {
-  "port": 3000,
-  "jwt_secret": "CQtf83WwAQ2V",
+  "port": 9999,
+  "jwt_secret": "xxxxxxxxxx",
   "db": {
-    "dbName": "rivzakat_looker",
-    "user": "rivzakat_looker",
-    "password": "O8J6*FkM",
-    "host": "rivzakat.beget.tech"
+    "dbName": "xxxxxxxxxx",
+    "user": "xxxxxxxxxx",
+    "password": "xxxxxxxxxx",
+    "host": "xxxxxxxxxx"
   },
   "smtp": {
     "transporter": {
-      "host": "smtp.yandex.ru",
-      "port": 465,
+      "host": "xxxxxxxxxx",
+      "port": 999,
       "secure": true,
       "auth": {
-        "user": "dz-10b@ya.ru",
-        "pass": "dcodflnvahhwdjsp"
+        "user": "xxxxxxxxxx",
+        "pass": "xxxxxxxxxx"
       }
     },
     "defaults": {
-      "from": "Looker <dz-10b@ya.ru>"
+      "from": "xxxxxxxxxx"
     }
   }
 }
