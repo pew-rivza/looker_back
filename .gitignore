@@ -1,4 +1,5 @@
 /node_modules/
 /.idea/
 /uploads/
-/config/
+/config/default.json
+/config/production.json
