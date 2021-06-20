@@ -5,6 +5,7 @@ const db = require("./../models");
 const User = db.User;
 const validation = require("../middlewares/validation.middleware");
 const errorHandler = require("./../errors");
+const HTTPStatuses = require("../constants/HTTPStatuses");
 
 router.post(
     "/register",
@@ -30,7 +31,7 @@ router.post(
             const user = await User.register(email, password);
             await user.sendCode();
 
-            res.status(201).json({ message: "Пользователь создан" });
+            res.status(HTTPStatuses.CREATED).json({ message: "Пользователь создан" });
         }
         catch (error) { errorHandler(error, res); }
     });
@@ -49,7 +50,7 @@ router.post(
             let user = await User.confirm(email, code);
             user = await user.authorize();
 
-            res.status(202).json(user);
+            res.status(HTTPStatuses.ACCEPTED).json(user);
 
         } catch (error) { errorHandler(error, res); }
     });
@@ -67,7 +68,7 @@ router.post(
             let user = await User.findActiveUser(email);
             await user.sendCode();
 
-            res.status(200).json({ message: "Код подтверждения выслан повторно" });
+            res.status(HTTPStatuses.OK).json({ message: "Код подтверждения выслан повторно" });
 
         } catch (error) { errorHandler(error, res); }
     });
@@ -85,7 +86,7 @@ router.post(
             let user = await User.findActiveUser(email);
             await user.sendCode();
 
-            res.status(200).json({ message: "Код подтверждения выслан" });
+            res.status(HTTPStatuses.OK).json({ message: "Код подтверждения выслан" });
         }
         catch (error) { errorHandler(error, res); }
     });
@@ -103,7 +104,7 @@ router.post(
             const { code, email } = req.body;
             await User.confirm(email, code);
 
-            res.status(202).json({ message: "E-mail подтвержден" });
+            res.status(HTTPStatuses.ACCEPTED).json({ message: "E-mail подтвержден" });
         }
         catch (error) { errorHandler(error, res); }
     });
@@ -132,7 +133,7 @@ router.post(
             let user = await User.findActiveUser(email);
             user.setPassword(password);
 
-            res.status(200).json({ message: "Пароль успешно изменен" });
+            res.status(HTTPStatuses.OK).json({ message: "Пароль успешно изменен" });
         }
         catch (error) { errorHandler(error, res); }
     });
@@ -150,7 +151,7 @@ router.post(
             const { email, password } = req.body;
             let user = await User.authenticate(email, password);
             user = await user.authorize();
-            res.status(200).json(user)
+            res.status(HTTPStatuses.OK).json(user)
         }
         catch (error) { errorHandler(error, res); }
     });

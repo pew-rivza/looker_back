@@ -7,6 +7,7 @@ const {check} = require("express-validator");
 const {validationResult} = require("express-validator");
 const db = require("./../models");
 const multer = require('multer');
+const HTTPStatuses = require("../constants/HTTPStatuses");
 
 const storage = multer.diskStorage({
     destination: 'uploads/',
@@ -29,7 +30,7 @@ router.post("/create",
             const errors = validationResult(req);
 
             if(!errors.isEmpty()) {
-                return res.status(400)
+                return res.status(HTTPStatuses.BAD_REQUEST)
                     .json({ errors: errors.array(), message: "Не все поля заполнены" })
             }
 
@@ -41,10 +42,10 @@ router.post("/create",
             user.addClothes(clothes);
 
 
-            res.status(201).json({ message: "Вещь создана", body: req.body, file: req.file, user: req.user, clothes });
+            res.status(HTTPStatuses.CREATED).json({ message: "Вещь создана", body: req.body, file: req.file, user: req.user, clothes });
         }
         catch (e) {
-            res.status(500).json({ message: "Что-то пошло не так, попробуйте снова", error: e, res })
+            res.status(HTTPStatuses.SERVER_ERROR).json({ message: "Что-то пошло не так, попробуйте снова", error: e, res })
         }
     }
 );
@@ -56,7 +57,7 @@ router.get("/", auth, async (req, res) => {
         res.json({clothes, request: req.headers});
     }
     catch (e) {
-        res.status(500).json({ message: "Что-то пошло не так, попробуйте снова", error: e, res })
+        res.status(HTTPStatuses.SERVER_ERROR).json({ message: "Что-то пошло не так, попробуйте снова", error: e, res })
     }
 });
 
@@ -66,7 +67,7 @@ router.get("/:id", auth, async (req, res) => {
         res.json(clothes);
     }
     catch (e) {
-        res.status(500).json({ message: "Что-то пошло не так, попробуйте снова", error: e, res })
+        res.status(HTTPStatuses.SERVER_ERROR).json({ message: "Что-то пошло не так, попробуйте снова", error: e, res })
     }
 });
 
