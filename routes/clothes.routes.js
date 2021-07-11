@@ -57,7 +57,7 @@ router.get("/", auth, async (req, res) => {
         res.json({clothes, request: req.headers});
     }
     catch (e) {
-        res.status(HTTPStatuses.SERVER_ERROR).json({ message: "Что-то пошло не так, попробуйте снова", error: e, res })
+        res.status(HTTPStatuses.SERVER_ERROR).json({ message: "Что-то пошло не так, попробуйте снова rivza", error: e, res })
     }
 });
 
