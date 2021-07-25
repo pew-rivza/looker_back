@@ -21,10 +21,28 @@ module.exports = (sequelize, DataTypes) => {
         User.belongsTo(ConfirmationCode)
     };
 
-    User.findActiveUser = async function(email) {
-        const user = await User.findOne({ where: { email, active: true } });
+    User.findById = async function(id) {
+        const user = await User.findOne({ where: { id } });
         if (!user) {
-            throw new ValidationError("Пользователь с таким e-mail не найден");
+            throw new ValidationError("Пользователь не найден");
+        }
+
+        return user;
+    }
+
+    User.findByEmail = async function(email) {
+        const user = await User.findOne({ where: { email } });
+        if (!user) {
+            throw new ValidationError("Пользователь не найден");
+        }
+
+        return user;
+    }
+
+    User.findActive = async function(id) {
+        const user = await User.findOne({ where: { id, active: true } });
+        if (!user) {
+            throw new ValidationError("Пользователь не найден");
         }
 
         return user;
@@ -44,8 +62,8 @@ module.exports = (sequelize, DataTypes) => {
         return user
     };
 
-    User.prototype.authorize = async function() {
-        const user = this;
+    User.authorize = async function(id) {
+        const user = await User.findById(id);
 
         const token = jwt.sign(
             { userId: user.id },
@@ -53,26 +71,25 @@ module.exports = (sequelize, DataTypes) => {
             { expiresIn: "8h" }
         )
 
-        return { user: user.id, token }
+        return { userId: user.id, token }
     };
 
-    User.existenceChecking = async function(email) {
+    User.isExist = async function(email) {
         const candidate = await User.findOne({ where: { email } });
-
-        if (candidate) {
-            throw new ValidationError("Пользователь с таким e-mail уже зарегистрирован");
-        }
+        return !!candidate
     };
 
     User.register = async function(email, password) {
-        await User.existenceChecking(email);
+        if (await User.isExist(email)) {
+            throw new ValidationError("Пользователь уже зарегистрирован");
+        }
         const hashedPassword = await bcrypt.hash(password, 12);
 
         return await User.create({ email, password: hashedPassword });
     }
 
-    User.prototype.sendCode = async function() {
-        const user = this;
+    User.sendCode = async function(id) {
+        const user = await User.findById(id);
 
         const existedCode = await user.getConfirmationCode();
         const code = existedCode ? existedCode.code : shortid.generate();
@@ -102,10 +119,10 @@ module.exports = (sequelize, DataTypes) => {
         });
     };
 
-    User.authenticateByConfirmationCode = async function (email, userCode) {
-        let user = await User.findOne({ where: { email }, include: "ConfirmationCode" });
+    User.validateConfirmationCode = async function (id, userCode) {
+        let user = await User.findOne({ where: { id }, include: "ConfirmationCode" });
         if (!(user && user.ConfirmationCode)) {
-            throw new DatabaseError("Данные о пользователе с таким e-mail не найдены");
+            throw new DatabaseError("Пользователь не найден");
         }
 
         const code = user.ConfirmationCode.code;
@@ -113,24 +130,25 @@ module.exports = (sequelize, DataTypes) => {
             throw new ValidationError("Неверный код подтверждения");
         }
 
-        return user;
+        return user.ConfirmationCode;
     };
 
-    User.confirm = async function(email, userCode) {
-        const user = await User.authenticateByConfirmationCode(email, userCode);
-        const code = user.ConfirmationCode;
+    User.confirm = async function(id, userCode) {
+        const code = await User.validateConfirmationCode(id, userCode);
 
-        await User.update({ active: true }, { where: { email } });
+        await User.update({ active: true }, { where: { id } });
         ConfirmationCode.destroy({ where: { id: code.id } });
-
-        return user;
     };
 
-    User.prototype.setPassword = async function(password) {
-        const user = this;
-        const hashedPassword = await bcrypt.hash(password, 12);
+    User.renew = async function(id, data) {
+        if (data.password) {
+            data.password = await bcrypt.hash(data.password, 12);
+        }
 
-        await User.update({ password: hashedPassword }, { where: { id: user.id } });
+        const user = User.findActive(id)
+        if (user) await User.update(data, { where: { id } });
+
+        return await user;
     };
 
     return User;
